@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 
 
@@ -11,7 +11,7 @@ class ConsumptionEvent:
     amount: float = 0.0
     card_number: str = ""
     restaurant_code: str = ""
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
 
     def to_dict(self) -> dict:
         return {

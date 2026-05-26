@@ -16,5 +16,6 @@ if __name__ == "__main__":
         port=int(os.getenv("RABBITMQ_PORT", "5672")),
         username=os.getenv("RABBITMQ_USER", "guest"),
         password=os.getenv("RABBITMQ_PASS", "guest"),
+        virtual_host=os.getenv("RABBITMQ_VHOST", "/"),
     )
     consumer.start()

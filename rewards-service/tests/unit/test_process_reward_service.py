@@ -1,6 +1,6 @@
 """Pruebas unitarias para ProcessRewardService."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import MagicMock
 import pytest
 
@@ -15,7 +15,7 @@ class TestProcessRewardService:
             amount=amount,
             card_number=card,
             restaurant_code="RESTP",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc).replace(tzinfo=None),
         )
 
     def _make_service(self, notifier=None):

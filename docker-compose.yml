@@ -1,19 +1,4 @@
 services:
-  rabbitmq:
-    image: rabbitmq:3.12-management
-    container_name: lab8-rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   restaurant-service:
     build:
       context: .
@@ -24,13 +9,11 @@ services:
     environment:
       - HOST=0.0.0.0
       - PORT=8001
-      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_HOST=213.199.42.57
       - RABBITMQ_PORT=5672
-      - RABBITMQ_USER=guest
-      - RABBITMQ_PASS=guest
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
+      - RABBITMQ_USER=students
+      - RABBITMQ_PASS=Ut3c2026
+      - RABBITMQ_VHOST=/
     volumes:
       - ./restaurant-service:/app
       - ./shared:/app/shared
@@ -41,13 +24,11 @@ services:
       dockerfile: rewards-service/Dockerfile
     container_name: lab8-rewards-service
     environment:
-      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_HOST=213.199.42.57
       - RABBITMQ_PORT=5672
-      - RABBITMQ_USER=guest
-      - RABBITMQ_PASS=guest
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
+      - RABBITMQ_USER=students
+      - RABBITMQ_PASS=Ut3c2026
+      - RABBITMQ_VHOST=/
     volumes:
       - ./rewards-service:/app
       - ./shared:/app/shared
@@ -58,13 +39,11 @@ services:
       dockerfile: notification-service/Dockerfile
     container_name: lab8-notification-service
     environment:
-      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_HOST=213.199.42.57
       - RABBITMQ_PORT=5672
-      - RABBITMQ_USER=guest
-      - RABBITMQ_PASS=guest
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
+      - RABBITMQ_USER=students
+      - RABBITMQ_PASS=Ut3c2026
+      - RABBITMQ_VHOST=/
     volumes:
       - ./notification-service:/app
       - ./shared:/app/shared

@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 from services.register_dinner import (
     RegisterDinnerCommand,
@@ -27,7 +27,7 @@ def main(argv: list[str] | None = None) -> int:
         amount=args.amount,
         card_number=args.card,
         restaurant_code=args.restaurant,
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(timezone.utc).replace(tzinfo=None),
     )
     try:
         dinner = service.execute(command)

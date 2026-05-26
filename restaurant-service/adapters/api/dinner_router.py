@@ -21,6 +21,7 @@ def _build_service() -> RegisterDinnerService:
             port=int(os.getenv("RABBITMQ_PORT", "5672")),
             username=os.getenv("RABBITMQ_USER", "guest"),
             password=os.getenv("RABBITMQ_PASS", "guest"),
+            virtual_host=os.getenv("RABBITMQ_VHOST", "/"),
         ),
     )
 
@@ -42,7 +43,6 @@ class DinnerResponse(BaseModel):
 
 @router.post(
     "/",
-    response_model=DinnerResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Registrar una nueva cena",
 )

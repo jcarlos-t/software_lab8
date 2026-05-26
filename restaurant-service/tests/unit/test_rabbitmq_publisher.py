@@ -15,7 +15,12 @@ class TestRabbitMQEventPublisher:
         mock_conn.channel.return_value = mock_channel
         mock_connection.return_value = mock_conn
         
-        publisher = RabbitMQEventPublisher()
+        publisher = RabbitMQEventPublisher(
+            host="localhost",
+            port=5672,
+            username="test-user",
+            password="test-pass",
+        )
         event = ConsumptionEvent(
             amount=100.0,
             card_number="1234567890",

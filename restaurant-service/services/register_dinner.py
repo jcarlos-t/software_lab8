@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 
 from models.dinner import Dinner
 from ports.dinner_repository import DinnerRepository
@@ -41,7 +41,7 @@ class RegisterDinnerService:
             amount=command.amount,
             card_number=command.card_number,
             restaurant_code=command.restaurant_code,
-            timestamp=command.timestamp or datetime.utcnow(),
+            timestamp=command.timestamp or datetime.now(timezone.utc).replace(tzinfo=None),
         )
         dinner.validate()
         self._dinner_repository.save(dinner)

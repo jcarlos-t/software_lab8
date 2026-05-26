@@ -16,15 +16,17 @@ class RabbitMQConsumer:
 
     def __init__(
         self,
-        host: str = "localhost",
-        port: int = 5672,
-        username: str = "guest",
-        password: str = "guest",
+        host: str,
+        port: int,
+        username: str,
+        password: str,
+        virtual_host: str = "/",
     ) -> None:
         self._host = host
         self._port = port
         self._username = username
         self._password = password
+        self._virtual_host = virtual_host
         self._connection = None
         self._channel = None
 
@@ -50,7 +52,7 @@ class RabbitMQConsumer:
     def start(self) -> None:
         credentials = pika.PlainCredentials(self._username, self._password)
         params = pika.ConnectionParameters(
-            host=self._host, port=self._port, credentials=credentials
+            host=self._host, port=self._port, virtual_host=self._virtual_host, credentials=credentials
         )
         self._connection = pika.BlockingConnection(params)
         self._channel = self._connection.channel()

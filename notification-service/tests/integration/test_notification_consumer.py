@@ -23,7 +23,12 @@ class TestNotificationConsumer:
 
     @patch("adapters.rabbitmq.rabbitmq_consumer.pika.BlockingConnection")
     def test_build_service(self, mock_connection):
-        consumer = RabbitMQConsumer()
+        consumer = RabbitMQConsumer(
+            host="localhost",
+            port=5672,
+            username="test-user",
+            password="test-pass",
+        )
         service = consumer._build_service()
         assert service is not None
         assert service._sender is not None
@@ -31,7 +36,12 @@ class TestNotificationConsumer:
 
     @patch("adapters.rabbitmq.rabbitmq_consumer.pika.BlockingConnection")
     def test_on_message_success(self, mock_connection):
-        consumer = RabbitMQConsumer()
+        consumer = RabbitMQConsumer(
+            host="localhost",
+            port=5672,
+            username="test-user",
+            password="test-pass",
+        )
         
         # Mock channel
         mock_channel = MagicMock()
@@ -48,7 +58,12 @@ class TestNotificationConsumer:
 
     @patch("adapters.rabbitmq.rabbitmq_consumer.pika.BlockingConnection")
     def test_on_message_invalid_json(self, mock_connection):
-        consumer = RabbitMQConsumer()
+        consumer = RabbitMQConsumer(
+            host="localhost",
+            port=5672,
+            username="test-user",
+            password="test-pass",
+        )
         
         mock_channel = MagicMock()
         mock_method = MagicMock()
