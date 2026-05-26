@@ -15,7 +15,8 @@ class TestDinnerRouter:
         assert response.status_code == 200
         assert response.json()["status"] == "ok"
 
-    @patch("adapters.repositories.rabbitmq_publisher.RabbitMQEventPublisher.publish_consumption")
+    @patch.dict("os.environ", {"RABBITMQ_HOST": "localhost", "RABBITMQ_PORT": "5672", "RABBITMQ_USER": "guest", "RABBITMQ_PASS": "guest", "RABBITMQ_VHOST": "/"})
+    @patch("adapters.rabbitmq.rabbitmq_publisher.RabbitMQEventPublisher.publish_consumption")
     def test_post_dinner_success(self, mock_pub):
         mock_pub.return_value = None
         payload = {
@@ -30,7 +31,7 @@ class TestDinnerRouter:
         assert data["card_number"] == "1234567890"
         assert "dinner_id" in data
 
-    @patch("adapters.repositories.rabbitmq_publisher.RabbitMQEventPublisher.publish_consumption")
+    @patch("adapters.rabbitmq.rabbitmq_publisher.RabbitMQEventPublisher.publish_consumption")
     def test_post_dinner_invalid_amount(self, mock_pub):
         payload = {
             "amount": -5.0,

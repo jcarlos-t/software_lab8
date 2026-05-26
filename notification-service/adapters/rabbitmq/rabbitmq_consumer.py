@@ -45,7 +45,7 @@ class RabbitMQConsumer:
                 cashback=float(data["cashback"]),
             )
             channel.basic_ack(delivery_tag=method.delivery_tag)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.error("Error procesando notificación: %s", exc)
             channel.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
 

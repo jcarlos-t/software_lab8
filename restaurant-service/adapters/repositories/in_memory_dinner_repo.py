@@ -3,7 +3,7 @@ from ports.dinner_repository import DinnerRepository
 
 
 class InMemoryDinnerRepository(DinnerRepository):
-    """Adaptador de salida: repositorio en memoria (ideal para pruebas)."""
+    """Adaptador de salida: repositorio en memoria (para pruebas)."""
 
     def __init__(self) -> None:
         self._store: dict[str, Dinner] = {}

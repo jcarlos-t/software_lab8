@@ -8,20 +8,19 @@ from services.register_dinner import (
     RegisterDinnerService,
 )
 from adapters.repositories.in_memory_dinner_repo import InMemoryDinnerRepository
-from adapters.repositories.rabbitmq_publisher import RabbitMQEventPublisher
+from adapters.rabbitmq.rabbitmq_publisher import RabbitMQEventPublisher
 
 router = APIRouter(prefix="/dinners", tags=["dinners"])
 
-# Dependency wiring (simple factory; reemplazar por DI en producción)
 def _build_service() -> RegisterDinnerService:
     return RegisterDinnerService(
         dinner_repository=InMemoryDinnerRepository(),
         event_publisher=RabbitMQEventPublisher(
-            host=os.getenv("RABBITMQ_HOST", "localhost"),
-            port=int(os.getenv("RABBITMQ_PORT", "5672")),
-            username=os.getenv("RABBITMQ_USER", "guest"),
-            password=os.getenv("RABBITMQ_PASS", "guest"),
-            virtual_host=os.getenv("RABBITMQ_VHOST", "/"),
+            host=os.getenv("RABBITMQ_HOST"),
+            port=int(os.getenv("RABBITMQ_PORT")),
+            username=os.getenv("RABBITMQ_USER"),
+            password=os.getenv("RABBITMQ_PASS"),
+            virtual_host=os.getenv("RABBITMQ_VHOST"),
         ),
     )
 

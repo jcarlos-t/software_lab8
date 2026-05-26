@@ -6,7 +6,7 @@ import pika  # type: ignore
 
 from services.process_reward import ProcessRewardService
 from adapters.repositories.in_memory_reward_repo import InMemoryRewardRepository
-from adapters.repositories.rabbitmq_notification_publisher import RabbitMQNotificationPublisher
+from adapters.rabbitmq.rabbitmq_notification_publisher import RabbitMQNotificationPublisher
 from shared.events.consumption_event import ConsumptionEvent
 
 logger = logging.getLogger(__name__)

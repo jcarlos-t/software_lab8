@@ -2,12 +2,12 @@
 
 from unittest.mock import patch, MagicMock
 
-from adapters.repositories.rabbitmq_notification_publisher import RabbitMQNotificationPublisher
+from adapters.rabbitmq.rabbitmq_notification_publisher import RabbitMQNotificationPublisher
 from shared.events.consumption_event import ConsumptionEvent
 
 
 class TestRabbitMQNotificationPublisher:
-    @patch("adapters.repositories.rabbitmq_notification_publisher.pika.BlockingConnection")
+    @patch("adapters.rabbitmq.rabbitmq_notification_publisher.pika.BlockingConnection")
     def test_publish_reward_processed(self, mock_connection):
         mock_conn = MagicMock()
         mock_channel = MagicMock()
@@ -32,7 +32,7 @@ class TestRabbitMQNotificationPublisher:
         mock_channel.basic_publish.assert_called_once()
         mock_conn.close.assert_called_once()
 
-    @patch("adapters.repositories.rabbitmq_notification_publisher.pika.BlockingConnection")
+    @patch("adapters.rabbitmq.rabbitmq_notification_publisher.pika.BlockingConnection")
     def test_publish_reward_processed_uses_correct_credentials(self, mock_connection):
         publisher = RabbitMQNotificationPublisher(
             host="test-host",
@@ -48,7 +48,7 @@ class TestRabbitMQNotificationPublisher:
         call_args = mock_connection.call_args
         assert call_args is not None
 
-    @patch("adapters.repositories.rabbitmq_notification_publisher.pika.BlockingConnection")
+    @patch("adapters.rabbitmq.rabbitmq_notification_publisher.pika.BlockingConnection")
     def test_publish_reward_processed_creates_correct_message_body(self, mock_connection):
         mock_conn = MagicMock()
         mock_channel = MagicMock()

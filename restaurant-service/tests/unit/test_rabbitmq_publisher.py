@@ -3,12 +3,12 @@
 from unittest.mock import patch, MagicMock
 import pytest
 
-from adapters.repositories.rabbitmq_publisher import RabbitMQEventPublisher
+from adapters.rabbitmq.rabbitmq_publisher import RabbitMQEventPublisher
 from shared.events.consumption_event import ConsumptionEvent
 
 
 class TestRabbitMQEventPublisher:
-    @patch("adapters.repositories.rabbitmq_publisher.pika.BlockingConnection")
+    @patch("adapters.rabbitmq.rabbitmq_publisher.pika.BlockingConnection")
     def test_publish_consumption(self, mock_connection):
         mock_conn = MagicMock()
         mock_channel = MagicMock()
@@ -38,7 +38,7 @@ class TestRabbitMQEventPublisher:
         # Verify connection was closed
         mock_conn.close.assert_called_once()
 
-    @patch("adapters.repositories.rabbitmq_publisher.pika.BlockingConnection")
+    @patch("adapters.rabbitmq.rabbitmq_publisher.pika.BlockingConnection")
     def test_publish_consumption_uses_correct_credentials(self, mock_connection):
         publisher = RabbitMQEventPublisher(
             host="test-host",

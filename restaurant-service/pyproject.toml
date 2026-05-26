@@ -24,7 +24,7 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = [".", "../shared"]
+pythonpath = [".", ".."]
 
 [tool.coverage.run]
 source = ["restaurant"]

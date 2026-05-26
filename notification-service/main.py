@@ -12,10 +12,10 @@ logging.basicConfig(
 
 if __name__ == "__main__":
     consumer = RabbitMQConsumer(
-        host=os.getenv("RABBITMQ_HOST", "localhost"),
-        port=int(os.getenv("RABBITMQ_PORT", "5672")),
-        username=os.getenv("RABBITMQ_USER", "guest"),
-        password=os.getenv("RABBITMQ_PASS", "guest"),
-        virtual_host=os.getenv("RABBITMQ_VHOST", "/"),
+        host=os.getenv("RABBITMQ_HOST"),
+        port=int(os.getenv("RABBITMQ_PORT")),
+        username=os.getenv("RABBITMQ_USER"),
+        password=os.getenv("RABBITMQ_PASS"),
+        virtual_host=os.getenv("RABBITMQ_VHOST"),
     )
     consumer.start()

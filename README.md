@@ -1,4 +1,4 @@
-# Sistema de Recompensas - Laboratorio 8
+# Sistema de Recompensas
 
 Sistema de recompensas para restaurantes implementado con arquitectura orientada a eventos y hexagonal (Ports & Adapters) en Python.
 
@@ -14,34 +14,11 @@ El sistema utiliza RabbitMQ como broker de mensajería para desacoplar tres micr
 
 **Servicios:**
 
-```
-                    ┌──────────────────┐
-                    │    RabbitMQ      │
-                    │     Broker       │
-                    └──┬───────────┬───┘
-                       │           │
-          publish      │           │      consume
-    ┌──────────────────┘           └──────────────────┐
-    ▼                                                    ▼
-┌─────────────────┐                        ┌──────────────────────┐
-│ Restaurant Svc  │                        │    Rewards Svc       │
-│ (API / CLI)     │─── consumption_events ──→│ (Consumer)          │
-│ Registra cenas  │                        │ Calcula puntos/      │
-│ y publica       │                        │ cashback, actualiza  │
-│ eventos         │                        │ cuenta, publica      │
-└─────────────────┘                        │ notificación         │
-                                           └──────────┬───────────┘
-                                                      │
-                                                      │ notification_events
-                                                      │
-                                                      ▼
-                                           ┌──────────────────────┐
-                                           │ Notification Svc     │
-                                           │ (Consumer)           │
-                                           │ Envía notificación   │
-                                           │ al cliente (consola) │
-                                           └──────────────────────┘
-```
+![arquitectura](img/arquitectura.png)
+
+### Diagrama de Casos de Uso
+
+![Diagrama de casos de uso](img/casos%20de%20uso.png)
 
 ### Nivel Micro: Arquitectura Hexagonal (Ports & Adapters)
 
@@ -52,15 +29,14 @@ Cada servicio separa la lógica de negocio (dominio) de los detalles técnicos m
 | **models/**   | Entidades/value objects del dominio (Dinner, RewardAccount, Notification, RewardRule) |
 | **services/** | Casos de uso — orquestan la lógica de negocio pura          |
 | **ports/**    | Contratos/interfaces abstractas para comunicación externa    |
-| **adapters/** | Implementaciones concretas de los puertos (RabbitMQ, APIs, repos en memoria, CLI) |
+| **adapters/** | Implementaciones concretas de los puertos (RabbitMQ, APIs, repos en memoria) |
 
 **Inbound adapters** (cómo llegan los datos al dominio):
 - API REST (`adapters/api/`) — Restaurant Service
-- CLI (`adapters/dinner_cli.py`) — Restaurant Service
 - RabbitMQ consumers (`adapters/rabbitmq/`) — Rewards & Notification Services
 
 **Outbound adapters** (cómo el dominio se comunica con el exterior):
-- RabbitMQ publishers (`adapters/repositories/`) — publicación de eventos
+- RabbitMQ publishers (`adapters/rabbitmq/`) — publicación de eventos
 - Repositorios en memoria (`adapters/repositories/`) — persistencia temporal
 - Console sender (`adapters/senders/`) — envío de notificaciones por consola
 
@@ -68,7 +44,7 @@ Cada servicio separa la lógica de negocio (dominio) de los detalles técnicos m
 
 ```
 software_lab8/
-├── restaurant-service/                # API REST + CLI para registro de cenas
+├── restaurant-service/                # API REST para registro de cenas
 │   ├── models/
 │   │   ├── dinner.py                  # Entidad Dinner
 │   │   └── client.py                  # Value Object Client
@@ -79,14 +55,13 @@ software_lab8/
 │   │   └── dinner_repository.py       # Puerto de salida para persistencia
 │   ├── adapters/
 │   │   ├── api/dinner_router.py       # Adaptador de entrada: API REST
-│   │   ├── dinner_cli.py              # Adaptador de entrada: CLI
+│   │   ├── rabbitmq/
+│   │   │   └── rabbitmq_publisher.py  # Adaptador de salida: RabbitMQ
 │   │   └── repositories/
-│   │       ├── rabbitmq_publisher.py  # Adaptador de salida: RabbitMQ
 │   │       └── in_memory_dinner_repo.py # Adaptador de salida: repositorio en memoria
 │   ├── tests/
 │   │   ├── unit/                      # Pruebas unitarias
 │   │   └── integration/               # Pruebas de integración
-│   ├── shared/                        # Copia local del módulo compartido
 │   ├── main.py                        # Entry point FastAPI
 │   ├── Dockerfile
 │   ├── pyproject.toml
@@ -111,7 +86,6 @@ software_lab8/
 │   ├── tests/
 │   │   ├── unit/
 │   │   └── integration/
-│   ├── shared/                        # Copia local del módulo compartido
 │   ├── main.py                        # Entry point del consumer
 │   ├── Dockerfile
 │   ├── pyproject.toml
@@ -131,18 +105,16 @@ software_lab8/
 │   ├── tests/
 │   │   ├── unit/
 │   │   └── integration/
-│   ├── shared/                        # Copia local del módulo compartido
 │   ├── main.py                        # Entry point del consumer
 │   ├── Dockerfile
 │   ├── pyproject.toml
 │   └── requirements.txt
-├── shared/                            # Módulo compartido (instalable vía pyproject.toml)
-│   └── src/shared/
-│       ├── events/
-│       │   └── consumption_event.py   # Evento de dominio: ConsumptionEvent
-│       └── messaging/
-│           ├── consumer.py            # Puerto abstracto AbstractConsumer
-│           └── publisher.py           # Puerto abstracto AbstractPublisher
+├── shared/                            # Módulo compartido
+│   ├── events/
+│   │   └── consumption_event.py   # Evento de dominio: ConsumptionEvent
+│   └── messaging/
+│       ├── consumer.py            # Puerto abstracto AbstractConsumer
+│       └── publisher.py           # Puerto abstracto AbstractPublisher
 ├── docker/                            # Recursos Docker
 ├── docker-compose.yml                 # Orquestación de servicios
 ├── sonar-project.properties           # Configuración SonarCloud
@@ -151,19 +123,7 @@ software_lab8/
 
 ## Flujo del Sistema
 
-```
-1. POST /dinners/  ──→  Restaurant Service  ──→  RabbitMQ (consumption_events)
-                                                         │
-                                                         ▼
-2.                                               Rewards Service
-                                                  ├── Calcula puntos y cashback
-                                                  ├── Actualiza RewardAccount
-                                                  └── Publica en RabbitMQ (notification_events)
-                                                         │
-                                                         ▼
-3.                                               Notification Service
-                                                  └── Envía notificación al cliente (consola)
-```
+![Diagrama de flujo](img/flujo.png)
 
 ### Evento de Consumo (formato JSON)
 
@@ -229,12 +189,6 @@ cd rewards-service && python main.py
 cd notification-service && python main.py
 ```
 
-### Alternativa: CLI del Restaurant Service
-
-```bash
-cd restaurant-service && python -m adapters.dinner_cli --amount 100 --card 1234567890 --restaurant REST-01
-```
-
 ## Pruebas
 
 Ejecutar pruebas por servicio:
@@ -245,7 +199,7 @@ cd rewards-service    && pytest --cov=. --cov-report=xml --cov-report=html
 cd notification-service && pytest --cov=. --cov-report=xml --cov-report=html
 ```
 
-O desde la raíz con el script auxiliar (si existe):
+O desde la raíz:
 ```bash
 # Ejecutar todas las pruebas y generar coverage combinado
 for svc in restaurant-service rewards-service notification-service; do
@@ -255,7 +209,7 @@ done
 
 ## Calidad de Código
 
-El proyecto se analiza vía **SonarCloud** (o SonarQube si se usa el servidor del curso):
+El proyecto se analiza vía **SonarQube**
 
 | Atributo           | Objetivo             |
 |--------------------|----------------------|
