@@ -1,34 +1,37 @@
-# Sistema de Recompensas
+# Sistema de Recompensas - Laboratorio 8
 
-Sistema de recompensas para restaurantes implementado con arquitectura orientada a eventos y hexagonal (Ports & Adapters) en Python.
+Sistema de recompensas para restaurantes implementado con arquitectura orientada a eventos (EDA) y hexagonal (Ports & Adapters) en Python.  
+Tres microservicios desacoplados se comunican asíncronamente mediante RabbitMQ para registrar consumos, calcular recompensas y notificar a los clientes.
+
+---
 
 ## Arquitectura
 
 ### Nivel Macro: Arquitectura Orientada a Eventos (EDA)
 
-El sistema utiliza RabbitMQ como broker de mensajería para desacoplar tres microservicios:
+El sistema utiliza **RabbitMQ** como broker de mensajería para desacoplar los microservicios. Cada servicio publica y consume eventos a través de colas, sin comunicación directa entre ellos.
 
 **Colas del sistema:**
 - `consumption_events` — el Restaurant Service publica eventos de cena; el Rewards Service los consume
 - `notification_events` — el Rewards Service publica eventos de recompensa procesada; el Notification Service los consume
 
-**Servicios:**
-
 ![arquitectura](img/arquitectura.png)
 
-### Diagrama de Casos de Uso
-
-![Diagrama de casos de uso](img/casos%20de%20uso.png)
+**Justificación de EDA:**
+- **Desacoplamiento total** — los servicios no se conocen entre sí, solo conocen el formato del evento
+- **Tolerancia a fallos** — si un servicio consumidor falla, los eventos permanecen en la cola hasta que se recupere
+- **Escalabilidad independiente** — cada servicio puede escalar horizontalmente según su propia demanda sin afectar a los demás
+- **Flujo asíncrono natural** — el procesamiento de recompensas no necesita ser instantáneo; el cliente recibe la notificación cuando el sistema completa el proceso
 
 ### Nivel Micro: Arquitectura Hexagonal (Ports & Adapters)
 
-Cada servicio separa la lógica de negocio (dominio) de los detalles técnicos mediante puertos (interfaces abstractas) y adaptadores (implementaciones concretas).
+Cada servicio separa la lógica de negocio (dominio) de los detalles técnicos mediante **puertos** (interfaces abstractas) y **adaptadores** (implementaciones concretas).
 
-| Capa          | Contenido                                                   |
-|---------------|-------------------------------------------------------------|
-| **models/**   | Entidades/value objects del dominio (Dinner, RewardAccount, Notification, RewardRule) |
-| **services/** | Casos de uso — orquestan la lógica de negocio pura          |
-| **ports/**    | Contratos/interfaces abstractas para comunicación externa    |
+| Capa | Contenido |
+|------|-----------|
+| **models/** | Entidades/value objects del dominio (Dinner, RewardAccount, Notification, RewardRule) |
+| **services/** | Casos de uso — orquestan la lógica de negocio pura |
+| **ports/** | Contratos/interfaces abstractas para comunicación externa |
 | **adapters/** | Implementaciones concretas de los puertos (RabbitMQ, APIs, repos en memoria) |
 
 **Inbound adapters** (cómo llegan los datos al dominio):
@@ -39,6 +42,32 @@ Cada servicio separa la lógica de negocio (dominio) de los detalles técnicos m
 - RabbitMQ publishers (`adapters/rabbitmq/`) — publicación de eventos
 - Repositorios en memoria (`adapters/repositories/`) — persistencia temporal
 - Console sender (`adapters/senders/`) — envío de notificaciones por consola
+
+**Justificación de Hexagonal:**
+- **Dominio puro** — la lógica de negocio no tiene dependencias de infraestructura (bases de datos, brokers, frameworks web), lo que la hace fácil de entender y modificar
+- **Testeabilidad** — los puertos se pueden mockear fácilmente; las pruebas unitarias validan la lógica de negocio sin necesidad de levantar infraestructura real
+- **Flexibilidad tecnológica** — cambiar de RabbitMQ a Kafka, o de repositorios en memoria a PostgreSQL, solo implica escribir un nuevo adaptador sin tocar el dominio
+- **Mantenibilidad** — cada adaptador tiene una responsabilidad única y está aislado del resto
+
+### Diagrama de Casos de Uso
+
+![Diagrama de casos de uso](img/casos%20de%20uso.png)
+
+---
+
+## Evidencia de Pruebas y Calidad
+
+### Tests
+
+![test1](img/test1.png)
+![test2](img/test2.png)
+
+
+### SonarQube
+
+![sonarqube](img/sonarqube.png)
+
+---
 
 ## Estructura del Proyecto
 
@@ -60,8 +89,8 @@ software_lab8/
 │   │   └── repositories/
 │   │       └── in_memory_dinner_repo.py # Adaptador de salida: repositorio en memoria
 │   ├── tests/
-│   │   ├── unit/                      # Pruebas unitarias
-│   │   └── integration/               # Pruebas de integración
+│   │   ├── unit/
+│   │   └── integration/
 │   ├── main.py                        # Entry point FastAPI
 │   ├── Dockerfile
 │   ├── pyproject.toml
@@ -115,11 +144,13 @@ software_lab8/
 │   └── messaging/
 │       ├── consumer.py            # Puerto abstracto AbstractConsumer
 │       └── publisher.py           # Puerto abstracto AbstractPublisher
-├── docker/                            # Recursos Docker
-├── docker-compose.yml                 # Orquestación de servicios
-├── sonar-project.properties           # Configuración SonarCloud
+├── docker/
+├── docker-compose.yml
+├── sonar-project.properties
 └── .gitignore
 ```
+
+---
 
 ## Flujo del Sistema
 
@@ -137,16 +168,20 @@ software_lab8/
 }
 ```
 
+---
+
 ## Requisitos Técnicos
 
-| Requisito      | Versión    |
-|----------------|------------|
-| **Python**     | ≥ 3.11     |
-| **RabbitMQ**   | 3.12+      |
-| **FastAPI**    | ≥ 0.110    |
-| **Pika**       | ≥ 1.3.2    |
-| **Pytest**     | ≥ 8.1      |
-| **Docker**     | cualquier  |
+| Requisito | Versión |
+|-----------|---------|
+| **Python** | ≥ 3.11 |
+| **RabbitMQ** | 3.12+ |
+| **FastAPI** | ≥ 0.110 |
+| **Pika** | ≥ 1.3.2 |
+| **Pytest** | ≥ 8.1 |
+| **Docker** | cualquier |
+
+---
 
 ## Ejecución
 
@@ -189,10 +224,9 @@ cd rewards-service && python main.py
 cd notification-service && python main.py
 ```
 
-## Pruebas
+### Pruebas
 
-Ejecutar pruebas por servicio:
-
+Por servicio:
 ```bash
 cd restaurant-service && pytest --cov=. --cov-report=xml --cov-report=html
 cd rewards-service    && pytest --cov=. --cov-report=xml --cov-report=html
@@ -201,30 +235,19 @@ cd notification-service && pytest --cov=. --cov-report=xml --cov-report=html
 
 O desde la raíz:
 ```bash
-# Ejecutar todas las pruebas y generar coverage combinado
 for svc in restaurant-service rewards-service notification-service; do
   (cd $svc && pytest --cov=. --cov-report=xml --cov-report=html)
 done
 ```
 
-## Calidad de Código
-
-El proyecto se analiza vía **SonarQube**
-
-| Atributo           | Objetivo             |
-|--------------------|----------------------|
-| Reliability        | A (Sin bugs)         |
-| Security           | A (Sin vulnerabilidades) |
-| Maintainability    | A (Deuda técnica < 5%) |
-| Duplications       | < 3%                 |
-| Test Coverage      | ≥ 85%                |
+---
 
 ## API Endpoints (Restaurant Service)
 
-| Método | Ruta          | Descripción                       |
-|--------|---------------|-----------------------------------|
-| POST   | `/dinners/`   | Registrar una nueva cena          |
-| GET    | `/health`     | Health check del servicio         |
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/dinners/` | Registrar una nueva cena |
+| GET | `/health` | Health check del servicio |
 
 ### Ejemplo: `POST /dinners/`
 
@@ -245,14 +268,16 @@ Respuesta:
 }
 ```
 
+---
+
 ## Principios de Diseño Aplicados
 
-| Principio        | Cómo se aplica                                        |
-|------------------|-------------------------------------------------------|
-| **Alta cohesión**  | Cada servicio y cada módulo tiene una responsabilidad única y bien definida |
+| Principio | Cómo se aplica |
+|-----------|----------------|
+| **Alta cohesión** | Cada servicio y cada módulo tiene una responsabilidad única y bien definida |
 | **Bajo acoplamiento** | Los servicios se comunican exclusivamente mediante eventos asíncronos vía RabbitMQ |
-| **Modularidad**     | Separación clara en capas (models, services, ports, adapters) dentro de cada servicio |
-| **Abstracción**     | Puertos (interfaces ABC) definen contratos; los adaptadores implementan los detalles concretos |
-| **Escalabilidad**   | Cada servicio puede escalar de forma independiente gracias al broker de eventos |
+| **Modularidad** | Separación clara en capas (models, services, ports, adapters) dentro de cada servicio |
+| **Abstracción** | Puertos (interfaces ABC) definen contratos; los adaptadores implementan los detalles concretos |
+| **Escalabilidad** | Cada servicio puede escalar de forma independiente gracias al broker de eventos |
 | **Arquitectura Hexagonal** | El dominio (models + services) no depende de infraestructura externa |
-| **Event-Driven**     | El flujo completo se orquesta mediante eventos publicados y consumidos asíncronamente |
+| **Event-Driven** | El flujo completo se orquesta mediante eventos publicados y consumidos asíncronamente |
