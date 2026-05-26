@@ -1,0 +1,12 @@
+[project]
+name = "shared"
+version = "1.0.0"
+description = "Shared module for events and messaging abstractions"
+requires-python = ">=3.10"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["shared", "shared.events", "shared.messaging"]

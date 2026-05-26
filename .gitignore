@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Coverage
+coverage.xml
+.coverage
+.coverage.*
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker/
+
+# Testing
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Environment
+.env
+*.env.local
+
+# Databases
+*.db
+*.sqlite
+
+# Logs
+*.log
+
+guia.md
+sonar-project.properties
